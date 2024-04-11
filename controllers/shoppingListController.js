@@ -41,9 +41,9 @@ const readSingleItemInList = async (req, res) => {
 
 const updateListItem = async (req, res) => {
     try {
-        const { _id } = req.params
+        const { id } = req.params
         const { name, price, category, image, description, } = req.body
-        const findItem = await shoppingListModel.findById({ _id })
+        const findItem = await shoppingListModel.findById({ _id:id })
         if (!findItem) return res.status(404).send({ message: "Item not found" });
 
         const update = await shoppingListModel.updateOne({
@@ -57,6 +57,7 @@ const updateListItem = async (req, res) => {
         if (!update) return res.status(500).send({ message: "Update failed" })
         return res.status(201).send({ message: "Update successful" })
     } catch (error) {
+        console.log(error)
         res.status(500).send({ message: "Internal server error" })
     }
 }
