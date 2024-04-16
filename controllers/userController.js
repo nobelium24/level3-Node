@@ -3,6 +3,7 @@
 const userModel = require("../models/userModel");
 const argon2 = require("argon2");
 const { createToken, verifyToken } = require("../services/sessionservice");
+const sendMail =  require("../services/mailerService")
 
 const register = async (req, res) => {
     try {
@@ -19,6 +20,8 @@ const register = async (req, res) => {
             password: hashedPassword,
             isAdmin
         })
+
+        await sendMail(email, name)
 
         return res.status(201).send({ message: "Account created successfully" })
     } catch (error) {
