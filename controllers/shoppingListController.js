@@ -1,4 +1,7 @@
+//@ts-check
+
 const { shoppingListModel } = require("../models/shoppingListModel")
+const cloudinary = require("../config/cloudinaryConfig");
 
 const insertIntoShoppingList = async (req, res) => {
     try {
@@ -6,15 +9,23 @@ const insertIntoShoppingList = async (req, res) => {
         if (name === "" || price === "" || category === "" || image === "" || description === "") {
             return res.status(400).send({ message: "Invalid query parameters" })
         }
-        await shoppingListModel.create({
+
+        const uploadedImage = await cloudinary.uploader.upload(image)
+        const uploadResult = {
+            public_id: uploadedImage.public_id,
+            secure_url:uploadedImage.secure_url
+        }
+
+        const response = await shoppingListModel.create({
             name,
             price,
             category,
-            image,
+            image:uploadResult,
             description
         })
-        return res.status(201).send({ message: "Item created successfully" })
+        return res.status(201).send({ message: "Item created successfully", response })
     } catch (error) {
+        console.log(error)
         return res.status(500).send({ message: "Internal server error" })
     }
 }
@@ -43,7 +54,7 @@ const updateListItem = async (req, res) => {
     try {
         const { id } = req.params
         const { name, price, category, image, description, } = req.body
-        const findItem = await shoppingListModel.findById({ _id:id })
+        const findItem = await shoppingListModel.findById({ _id: id })
         if (!findItem) return res.status(404).send({ message: "Item not found" });
 
         const update = await shoppingListModel.updateOne({
